@@ -3,6 +3,15 @@ import * as Yup from 'yup';
 import Meetup from '../models/Meetup';
 
 class MeetupController {
+  async index(req, res) {
+    const meetups = await Meetup.findAll({
+      where: {
+        user_id: req.userId,
+      },
+    });
+    return res.json(meetups);
+  }
+
   async store(req, res) {
     const schema = Yup.object().shape({
       file_id: Yup.number().required(),
