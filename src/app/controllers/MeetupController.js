@@ -63,11 +63,35 @@ class MeetupController {
     }
 
     if (meetup.past) {
-      return res.status(400).json({ error: "Can't update past meetups." });
+      return res
+        .status(400)
+        .json({ error: "Can't update past meetups." }, { new: true });
     }
 
     await meetup.update(req.body);
     return res.json(meetup);
+  }
+
+  /**
+   * O usuário deve poder cancelar meetups organizados por ele e que ainda não aconteceram.
+   * O cancelamento deve deletar o meetup da base de dados.
+   */
+  async delete(req, res) {
+    const meetup = await Meetup.findByPk(req.params.id);
+    if (!meetup) {
+      return res.status(400).json({ error: 'Meetup not found.' });
+    }
+
+    if (meetup.user_id !== req.userId) {
+      return res.status(401).json({ error: 'Not authorized.' });
+    }
+
+    if (meetup.past) {
+      return res.status(400).json({ error: 'This meetup alredy be done.' });
+    }
+
+    await meetup.destroy();
+    return res.json({});
   }
 }
 
