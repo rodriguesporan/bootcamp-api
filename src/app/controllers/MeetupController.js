@@ -72,10 +72,6 @@ class MeetupController {
     return res.json(meetup);
   }
 
-  /**
-   * O usuário deve poder cancelar meetups organizados por ele e que ainda não aconteceram.
-   * O cancelamento deve deletar o meetup da base de dados.
-   */
   async delete(req, res) {
     const meetup = await Meetup.findByPk(req.params.id);
     if (!meetup) {
