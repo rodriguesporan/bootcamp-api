@@ -50,9 +50,11 @@ class MeetupController {
     }
 
     if (isBefore(parseISO(req.body.date), new Date())) {
-      return res.status(400).json({
-        error: 'You can only update meetups 2 hours until they start.',
-      });
+      return res.status(400).json({ error: 'Invalid date.' });
+    }
+
+    if (meetup.past) {
+      return res.status(400).json({ error: "Can't update past meetups." });
     }
 
     await meetup.update(req.body);
