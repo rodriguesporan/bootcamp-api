@@ -1,6 +1,8 @@
 import { Op } from 'sequelize';
 import Subscription from '../models/Subscription';
 import Meetup from '../models/Meetup';
+import User from '../models/User';
+import Mail from '../../lib/Mail';
 
 class SubscriptionController {
   async index(req, res) {
@@ -28,7 +30,9 @@ class SubscriptionController {
     if (!meetup) {
       return res.status(400).json({ error: 'Invalid meetup.' });
     }
+    const organizer = await User.findByPk(meetup.user_id);
     const user_id = req.userId;
+    const user = await User.findByPk(user_id);
     if (user_id === meetup.user_id) {
       return res
         .status(400)
@@ -64,6 +68,12 @@ class SubscriptionController {
     }
 
     const subscription = await Subscription.create({ meetup_id, user_id });
+    await Mail.sendMessage({
+      to: `${organizer.name} <${organizer.email}>`,
+      subject: `Nova inscrição em: ${meetup.title}`,
+      text: `Nova inscrição de ${user.name}`,
+      html: `<p>Nova inscrição de ${user.name}</p>`,
+    });
     return res.json(subscription);
   }
 }
