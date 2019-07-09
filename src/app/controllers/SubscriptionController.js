@@ -2,7 +2,8 @@ import { Op } from 'sequelize';
 import Subscription from '../models/Subscription';
 import Meetup from '../models/Meetup';
 import User from '../models/User';
-import Mail from '../../lib/Mail';
+import Queue from '../../lib/Queue';
+import ConfirmationMail from '../jobs/ConfirmationMail';
 
 class SubscriptionController {
   async index(req, res) {
@@ -68,16 +69,10 @@ class SubscriptionController {
     }
 
     const subscription = await Subscription.create({ meetup_id, user_id });
-    await Mail.sendMessage({
-      to: `${organizer.name} <${organizer.email}>`,
-      subject: `Nova inscrição em: ${meetup.title}`,
-      text: `Nova inscrição de ${user.name}`,
-      template: 'confirmation',
-      context: {
-        organizer,
-        user,
-        meetup,
-      },
+    await Queue.add(ConfirmationMail.key, {
+      organizer,
+      meetup,
+      user,
     });
     return res.json(subscription);
   }
