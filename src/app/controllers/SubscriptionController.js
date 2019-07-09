@@ -72,7 +72,12 @@ class SubscriptionController {
       to: `${organizer.name} <${organizer.email}>`,
       subject: `Nova inscrição em: ${meetup.title}`,
       text: `Nova inscrição de ${user.name}`,
-      html: `<p>Nova inscrição de ${user.name}</p>`,
+      template: 'confirmation',
+      context: {
+        organizer,
+        user,
+        meetup,
+      },
     });
     return res.json(subscription);
   }
